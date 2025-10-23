@@ -1,0 +1,78 @@
+---
+title: "Writing Functions"
+author: "Shivalika Chavan"
+date: "2025-10-23"
+output: github_document
+---
+
+```{r collapse=TRUE}
+library(tidyverse)
+library(rvest)
+library(readxl)
+
+set.seed(1)
+```
+
+Z scores
+```{r collapse=TRUE}
+x_vec = rnorm(20, mean = 10, sd = 3.5)
+
+(x_vec - mean(x_vec)) / sd(x_vec)
+
+```
+
+Write a function to compute z score
+```{r collapse=TRUE}
+z_scores = function(x){
+  if(!is.numeric(x)){
+    stop("The input of x should be numeric")
+  }
+  if(length(x)<5){
+    stop("Only compute z scores when input has 5 or more numbers")
+  }
+  z = (x - mean(x)) / sd(x)
+  z
+}
+```
+
+Trying function
+```{r collapse=TRUE}
+z_scores(x = x_vec)
+
+num_vec = rnorm(123, mean = 14, sd = 0.4)
+z_scores(x = num_vec)
+```
+
+Breaking the function
+```{r error=TRUE, collapse=TRUE}
+z_scores(3)
+z_scores("My name is Shivalika")
+```
+
+Computing some stuff
+Return mean and sd of a numeric vector
+```{r collapse=TRUE}
+mean_and_sd = function(x){
+  
+  if(!is.numeric(x)){
+    stop("The input of x should be numeric")
+  }
+  
+  if(length(x) < 5){
+    stop("Only compute z scores when input has 5 or more numbers")
+  }
+  
+  mean_x = mean(x, na.rm = TRUE)
+  sd_x = sd(x, na.rm = TRUE)
+  
+  # c(mean_x, sd_x)
+  tibble(
+    mean = mean_x,
+    sd = sd_x
+  )
+  
+}
+
+mean_and_sd(x_vec)
+```
+

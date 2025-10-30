@@ -229,4 +229,46 @@ slr_sim_results_df |>
 
 <img src="simulations_files/figure-gfm/unnamed-chunk-12-1.png" width="90%" />
 
-## Last example
+## Last example - Birthday problem
+
+``` r
+birthdays = sample(1:365, 50, replace = TRUE)
+
+repeated_bday = length(unique(birthdays)) < 50
+
+repeated_bday
+```
+
+    ## [1] TRUE
+
+``` r
+bday_sim = function(n_room){
+  
+  birthdays = sample(1:365, n_room, replace = TRUE)
+
+  repeated_bday = length(unique(birthdays)) < n_room
+  
+  repeated_bday
+}
+```
+
+``` r
+bday_sim_results = 
+  expand_grid(
+    bdays = 1:60,
+    iter = 1:2500
+  ) |> 
+  mutate(
+    results = map_lgl(bdays, bday_sim)
+  ) |> 
+  group_by(bdays) |> 
+  summarize(
+    prob = mean(results)
+  ) 
+
+bday_sim_results|> 
+  ggplot(aes(x = bdays, y = prob)) +
+  geom_point() + geom_line()
+```
+
+<img src="simulations_files/figure-gfm/unnamed-chunk-15-1.png" width="90%" />

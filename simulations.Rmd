@@ -105,3 +105,75 @@ sim_results_df |>
   )
 ```
 
+## Simple Linear Regression
+
+```{r}
+sim_df = 
+  tibble(
+    x = rnorm(30, mean = 1, sd = 1),
+    y = 2 + 3*x + rnorm(30, mean = 0, sd = 1)
+  )
+
+sim_df |> 
+  ggplot(aes(x = x, y = y)) +
+  geom_point()
+
+
+slr_fit = lm(y ~ x, data = sim_df)
+
+coef(slr_fit)
+```
+
+
+Turn this into a function
+```{r}
+sim_regression = function(n_subj, beta_0 = 2, beta_1 = 3){
+  
+  sim_df = 
+  tibble(
+    x = rnorm(n_subj, mean = 1, sd = 1),
+    y = beta_0 + beta_1*x + rnorm(n_subj, mean = 0, sd = 1)
+  )
+  
+  slr_fit = lm(y ~ x, data = sim_df)
+  
+  tibble(
+    beta_0_hat = coef(slr_fit)[1],
+    beta_1_hat = coef(slr_fit)[2]
+  )
+}
+```
+
+
+```{r}
+sim_regression(n_subj = 30)
+```
+
+simulating with a for loop
+```{r}
+output = vector("list", length = 500)
+for (i in 1:500){
+  output[[i]] = sim_regression(n_subj = 30)
+}
+output |> bind_rows()
+```
+
+
+```{r}
+slr_sim_results_df = 
+  expand_grid(
+    sample_size = 30,
+    iter = 1:500
+  ) |> 
+  mutate(
+    results = map(sample_size, sim_regression)
+  ) |> 
+  unnest(results)
+
+slr_sim_results_df |> 
+  ggplot(aes(x = beta_0_hat, y = beta_1_hat)) + 
+  geom_point()
+```
+
+
+## Last example

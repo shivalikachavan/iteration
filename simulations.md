@@ -131,3 +131,102 @@ sim_results_df |>
     ## 2          60           2.99        0.255
     ## 3          90           3.00        0.207
     ## 4         120           3.00        0.188
+
+## Simple Linear Regression
+
+``` r
+sim_df = 
+  tibble(
+    x = rnorm(30, mean = 1, sd = 1),
+    y = 2 + 3*x + rnorm(30, mean = 0, sd = 1)
+  )
+
+sim_df |> 
+  ggplot(aes(x = x, y = y)) +
+  geom_point()
+```
+
+<img src="simulations_files/figure-gfm/unnamed-chunk-8-1.png" width="90%" />
+
+``` r
+slr_fit = lm(y ~ x, data = sim_df)
+
+coef(slr_fit)
+```
+
+    ## (Intercept)           x 
+    ##    2.332705    2.748355
+
+Turn this into a function
+
+``` r
+sim_regression = function(n_subj, beta_0 = 2, beta_1 = 3){
+  
+  sim_df = 
+  tibble(
+    x = rnorm(n_subj, mean = 1, sd = 1),
+    y = beta_0 + beta_1*x + rnorm(n_subj, mean = 0, sd = 1)
+  )
+  
+  slr_fit = lm(y ~ x, data = sim_df)
+  
+  tibble(
+    beta_0_hat = coef(slr_fit)[1],
+    beta_1_hat = coef(slr_fit)[2]
+  )
+}
+```
+
+``` r
+sim_regression(n_subj = 30)
+```
+
+    ## # A tibble: 1 × 2
+    ##   beta_0_hat beta_1_hat
+    ##        <dbl>      <dbl>
+    ## 1       1.68       2.94
+
+simulating with a for loop
+
+``` r
+output = vector("list", length = 500)
+for (i in 1:500){
+  output[[i]] = sim_regression(n_subj = 30)
+}
+output |> bind_rows()
+```
+
+    ## # A tibble: 500 × 2
+    ##    beta_0_hat beta_1_hat
+    ##         <dbl>      <dbl>
+    ##  1       1.77       3.36
+    ##  2       1.67       3.29
+    ##  3       2.27       2.75
+    ##  4       2.07       2.75
+    ##  5       2.14       2.89
+    ##  6       1.86       3.03
+    ##  7       1.86       2.75
+    ##  8       2.09       3.04
+    ##  9       1.97       2.98
+    ## 10       2.68       2.73
+    ## # ℹ 490 more rows
+
+``` r
+slr_sim_results_df = 
+  expand_grid(
+    sample_size = 30,
+    iter = 1:500
+  ) |> 
+  mutate(
+    results = map(sample_size, sim_regression)
+  ) |> 
+  unnest(results)
+
+slr_sim_results_df |> 
+  ggplot(aes(x = beta_0_hat, y = beta_1_hat)) + 
+  geom_point()
+```
+
+<img src="simulations_files/figure-gfm/unnamed-chunk-12-1.png" width="90%" />
+
+## Last example

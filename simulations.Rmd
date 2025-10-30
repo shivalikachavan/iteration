@@ -7,6 +7,7 @@ output: github_document
 
 ```{r collapse=TRUE}
 library(tidyverse)
-library(rvest)
+
+set.seed(1)
 ```
 

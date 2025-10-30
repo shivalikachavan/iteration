@@ -127,3 +127,134 @@ mean_and_sd(x_vec)
 ##   <dbl> <dbl>
 ## 1  10.7  3.20
 ```
+
+Making up data (simulations)
+
+``` r
+sim_df = 
+  tibble(
+    x = rnorm(n = 30, mean = 3, sd = 2)
+  )
+
+
+sim_df |> 
+  summarize(
+    mu_hat = mean(x),
+    sigma_hat = sd(x)
+  )
+```
+
+    ## # A tibble: 1 × 2
+    ##   mu_hat sigma_hat
+    ##    <dbl>     <dbl>
+    ## 1   2.95      2.26
+
+``` r
+source("./source/sim_mean_sd.R")
+sim_mean_sd(mu = 48, 50)
+```
+
+    ## # A tibble: 1 × 2
+    ##   mu_hat sigma_hat
+    ##    <dbl>     <dbl>
+    ## 1   48.2      2.07
+
+Import LoTR data
+
+``` r
+fellowship_ring = 
+  read_excel("./data/LotR_Words.xlsx", range = "B3:D6") |> 
+  mutate(
+    movie = "Fellowship of the Ring"
+  )
+
+two_towers = 
+  read_excel("./data/LotR_Words.xlsx", range = "F3:H6") |> 
+  mutate(
+    movie = "Two Towers"
+  )
+
+return_of_the_king = 
+  read_excel("./data/LotR_Words.xlsx", range = "J3:L6") |> 
+  mutate(
+    movie = "Return of the King"
+  )
+
+lotr_df = bind_rows(fellowship_ring, two_towers, return_of_the_king)
+```
+
+Same thing but a function
+
+``` r
+import_lotr = function(filepath = "./data/LotR_Words.xlsx", xlsx_range, title){
+  movie_df = 
+  read_excel(filepath, range = xlsx_range) |> 
+  mutate(
+    movie = title
+  )
+}
+fellowship_ring = import_lotr(xlsx_range = "B3:D6", title = "Fellowship of the Ring")
+two_towers = import_lotr(xlsx_range = "F3:H6", title = "Two Towers")
+return_of_the_king = import_lotr(xlsx_range = "J3:L6", title = "Return of the King")
+
+lotr_df = bind_rows(fellowship_ring, two_towers, return_of_the_king)
+```
+
+Last example
+
+``` r
+nsduh_url = "http://samhda.s3-us-gov-west-1.amazonaws.com/s3fs-public/field-uploads/2k15StateFiles/NSDUHsaeShortTermCHG2015.htm"
+
+nsduh_html = read_html(nsduh_url)
+```
+
+``` r
+data_marj = 
+  nsduh_html |> 
+  html_table() |> 
+  nth(1) |>
+  slice(-1) |> 
+  select(-contains("P Value")) |>
+  pivot_longer(
+    -State,
+    names_to = "age_year", 
+    values_to = "percent") |>
+  separate(age_year, into = c("age", "year"), sep = "\\(") |>
+  mutate(
+    year = str_replace(year, "\\)", ""),
+    percent = str_replace(percent, "[a-c]$", ""),
+    percent = as.numeric(percent)) |>
+  filter(!(State %in% c("Total U.S.", "Northeast", "Midwest", "South", "West")))
+```
+
+``` r
+nsduh_table <- function(html, table_num, table_name) {
+  table = 
+    html |> 
+    html_table() |> 
+    nth(table_num) |>
+    slice(-1) |> 
+    select(-contains("P Value")) |>
+    pivot_longer(
+      -State,
+      names_to = "age_year", 
+      values_to = "percent") |>
+    separate(age_year, into = c("age", "year"), sep = "\\(") |>
+    mutate(
+      year = str_replace(year, "\\)", ""),
+      percent = str_replace(percent, "[a-c]$", ""),
+      percent = as.numeric(percent),
+      name = table_name) |>
+    filter(!(State %in% c("Total U.S.", "Northeast", "Midwest", "South", "West")))
+  
+  table
+  
+}
+
+nsduh_results = 
+  bind_rows(
+    nsduh_table(nsduh_html, table_num = 1, "marj_one_year"),
+    nsduh_table(nsduh_html, table_num = 4, "cocaine_one_year"),
+    nsduh_table(nsduh_html, table_num = 5, "heroin_one_year")
+  )
+```

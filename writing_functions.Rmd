@@ -92,20 +92,7 @@ sim_df |>
 ```
 
 ```{r}
-sim_mean_sd = function(n_subj = 30, mu = 3, sigma = 2){
-  sim_df = 
-  tibble(
-    x = rnorm(n = n_subj, mean = mu, sd = sigma)
-  )
-  sim_df |> 
-    summarize(
-      mu_hat = mean(x),
-      sigma_hat = sd(x)
-      )
-}
-```
-
-```{r}
+source("./source/sim_mean_sd.R")
 sim_mean_sd(mu = 48, 50)
 ```
 

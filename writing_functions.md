@@ -151,6 +151,9 @@ sim_df |>
 
 ``` r
 source("./source/sim_mean_sd.R")
+```
+
+``` r
 sim_mean_sd(mu = 48, 50)
 ```
 

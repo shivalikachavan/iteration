@@ -1,0 +1,12 @@
+---
+title: "Simulations"
+author: "Shivalika Chavan"
+date: "2025-10-30"
+output: github_document
+---
+
+```{r collapse=TRUE}
+library(tidyverse)
+library(rvest)
+```
+
